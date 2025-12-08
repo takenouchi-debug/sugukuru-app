@@ -80,20 +80,21 @@ body, html {
     <input type="hidden" id="input-overtime">
     
     <div id="extra-time-fields" class="extra-time-inputs">
-        <p class="text-sm font-bold mb-3 text-blue-600">— 時間外労働の具体的な上限 —</p>
+        <p class="text-sm font-bold mb-3 text-blue-600">— 時間外労働の具体的な上限（すべて時間で入力） —</p>
         <div class="flex items-center mb-3">
-            <input type="number" id="input-overtime-day" placeholder="0" class="w-1/3 mr-2 text-center" style="font-size:1.1rem; padding:10px;">
+            <input type="number" id="input-overtime-day" placeholder="0" class="w-1/3 mr-2 text-center" oninput="checkInput(this)" style="font-size:1.1rem; padding:10px;">
             <span class="text-lg">時間/日</span>
-            <input type="number" id="input-overtime-week" placeholder="0" class="w-1/3 mx-2 text-center" style="font-size:1.1rem; padding:10px;">
+        </div>
+        <div class="flex items-center mb-3">
+            <input type="number" id="input-overtime-week" placeholder="0" class="w-1/3 mr-2 text-center" oninput="checkInput(this)" style="font-size:1.1rem; padding:10px;">
             <span class="text-lg">時間/週</span>
         </div>
         <div class="flex items-center">
-            <input type="number" id="input-overtime-month-hours" placeholder="0" class="w-1/3 mr-2 text-center" style="font-size:1.1rem; padding:10px;">
+            <input type="number" id="input-overtime-month-hours" placeholder="0" class="w-1/3 mr-2 text-center" oninput="checkInput(this)" style="font-size:1.1rem; padding:10px;">
             <span class="text-lg">時間/月</span>
         </div>
     </div>
 </div></div>
-
 <div class="slide"><div class="input-group"><div class="question-number">7/17 募集枠</div><div class="question-text">必要人数を入力してください</div>
     <div class="flex items-center gap-4">
         <input type="number" id="input-headcount" placeholder="3" oninput="checkInput(this)" class="text-center">
@@ -125,9 +126,9 @@ body, html {
     
     <div id="complaint-fields" class="extra-time-inputs">
         <label class="block text-gray-500 font-medium mb-1 mt-3 text-base">お名前</label>
-        <input type="text" id="input-complaint-name" placeholder="例: 営業部長 花子">
+        <input type="text" id="input-complaint-name" placeholder="例: 営業部長 花子" oninput="checkInput(this)">
         <label class="block text-gray-500 font-medium mb-1 mt-4 text-base">連絡先</label>
-        <input type="text" id="input-complaint-contact" placeholder="例: 0993-XX-XXXX">
+        <input type="text" id="input-complaint-contact" placeholder="例: 0993-XX-XXXX" oninput="checkInput(this)">
     </div>
 </div></div>
 
@@ -166,7 +167,7 @@ body, html {
             </div>
             <div class="col-span-1">
                 <label class="block text-gray-500 font-medium mb-1 text-base">備考</label>
-                <input type="text" id="input-transport-note" placeholder="例: 免許証の要否など" style="font-size:1.1rem; padding:10px;">
+                <input type="text" id="input-transport-note" placeholder="例: 免許証の要否など" oninput="checkInput(this)" style="font-size:1.1rem; padding:10px;">
             </div>
         </div>
     </div>
@@ -212,6 +213,7 @@ body, html {
         </div>
         
         <button onclick="location.reload()" class="text-gray-400 underline text-sm mt-6 hover:text-gray-600">新しい案件を入力する</button>
+        
     </div>
 </div>
 
@@ -263,8 +265,9 @@ function updateUI() {
     // プログレスバーの要素が存在しないため、ここでは無視します（デザインが適用されれば解決）
 
     if (currentSlideIndex > 0 && currentSlideIndex < slides.length - 1) {
-        const currentInput = slides[currentSlideIndex].querySelector('input[type="text"], input[type="number"], input[type="date"], textarea, select, input[type="hidden"]');
-        checkInput(currentInput);
+        // 次へボタンの入力チェックを走らせる
+        const inputElement = slides[currentSlideIndex].querySelector('input[type="text"], input[type="number"], input[type="date"], textarea, select, input[type="hidden"]');
+        checkInput(inputElement); 
         btnNext.style.display = 'flex';
     } else if (currentSlideIndex === slides.length - 1) {
         btnNext.style.display = 'none';
@@ -297,7 +300,7 @@ function saveCurrentFormData() {
     formData['終了予定日'] = document.getElementById('input-end-date')?.value || '';
     // Q5. 勤務時間と休日
     formData['勤務時間・休日'] = document.getElementById('input-time')?.value || '';
-    // Q6. 時間外労働 (修正後)
+    // Q6. 時間外労働 
     formData['時間外労働の有無'] = document.getElementById('input-overtime')?.value || '無';
     if (formData['時間外労働の有無'] === '有') {
         formData['残業上限_日'] = document.getElementById('input-overtime-day')?.value || '0';
@@ -362,12 +365,15 @@ function checkInput(element) {
     } else if (currentSlideIndex === 4) { 
         isComplete = document.getElementById('input-start-date').value !== '' && document.getElementById('input-end-date').value !== '';
     } else if (currentSlideIndex === 6) { 
-        // Q6. 時間外労働のチェック (修正後)
+        // Q6. 時間外労働のチェック (修正後: 有の場合、月の時間をチェック)
         const overtime = document.getElementById('input-overtime').value;
         isComplete = overtime !== '';
         if (overtime === '有') {
-            // 月の時間が入力されていればOK
-            isComplete = isComplete && document.getElementById('input-overtime-month-hours').value.trim() !== '';
+            const dayInput = document.getElementById('input-overtime-day').value.trim();
+            const weekInput = document.getElementById('input-overtime-week').value.trim();
+            const monthInput = document.getElementById('input-overtime-month-hours').value.trim();
+            // 3つのうちどれか一つでも入力されていればOK
+            isComplete = (dayInput !== '' || weekInput !== '' || monthInput !== ''); 
         }
     } else if (currentSlideIndex === 8) { 
         isComplete = document.getElementById('input-price-nomental').value !== '';
@@ -376,13 +382,16 @@ function checkInput(element) {
         const complaintRole = document.getElementById('input-complaint-role').value;
         isComplete = complaintRole !== '';
         if (complaintRole === 'その他') {
-            isComplete = isComplete && document.getElementById('input-complaint-name').value.trim() !== '' && document.getElementById('input-complaint-contact').value.trim() !== '';
+            const nameInput = document.getElementById('input-complaint-name').value.trim();
+            const contactInput = document.getElementById('input-complaint-contact').value.trim();
+            // 名前か連絡先が入力されていればOK
+            isComplete = (nameInput !== '' || contactInput !== '');
         }
     } else if (currentSlideIndex === 13) { 
         const transport = document.getElementById('input-transport').value;
         isComplete = transport !== '';
         if (transport === '自力通勤') {
-            isComplete = isComplete && document.getElementById('input-transport-means').value !== '';
+            isComplete = document.getElementById('input-transport-means').value !== '';
         }
     } else if (currentSlideIndex > 0 && currentSlideIndex < slides.length - 1) {
         const inputElement = currentSlide.querySelector('input[type="text"], input[type="number"], input[type="date"], textarea, select');
@@ -412,7 +421,8 @@ function selectChoice(inputId, value) {
         event.currentTarget.classList.add('selected');
     }
 
-    checkInput(inputElement);
+    // ここでチェックロジックを強制的に実行し、次へボタンの状態を即座に更新する
+    checkInput(inputElement); 
 }
 
 function toggleExtraTimeInputs(inputId, value, show) {
@@ -426,6 +436,8 @@ function toggleExtraTimeInputs(inputId, value, show) {
         document.getElementById('input-overtime-week').value = '';
         document.getElementById('input-overtime-month-hours').value = '';
     }
+    // ここでチェックロジックを強制的に実行する
+    checkInput(document.getElementById(inputId));
 }
 
 function toggleComplaintInputs(inputId, value, show) {
@@ -438,6 +450,8 @@ function toggleComplaintInputs(inputId, value, show) {
         document.getElementById('input-complaint-name').value = '';
         document.getElementById('input-complaint-contact').value = '';
     }
+    // ここでチェックロジックを強制的に実行する
+    checkInput(document.getElementById(inputId));
 }
 
 function selectChoiceAndShowNote(inputId, value) {
@@ -450,6 +464,8 @@ function selectChoiceAndShowNote(inputId, value) {
         document.getElementById('input-transport-means').value = '';
         document.getElementById('input-transport-note').value = '';
     }
+    // ここでチェックロジックを強制的に実行する
+    checkInput(document.getElementById(inputId));
 }
 
 
@@ -468,10 +484,19 @@ function generateResult() {
     resultText += `期間: ${formData['開始日']} 〜 ${formData['終了予定日']}\n`;
     resultText += `勤務時間・休日: ${formData['勤務時間・休日'].replace(/\n/g, ' ')}\n`;
     
-    // 時間外労働の表示 (修正後)
+    // 時間外労働の表示
     let overtimeText = formData['時間外労働の有無'];
     if (overtimeText === '有') {
-        overtimeText += ` (日:${formData['残業上限_日']}H, 週:${formData['残業上限_週']}H, 月:${formData['残業上限_月_時間']}H)`;
+        const day = formData['残業上限_日'];
+        const week = formData['残業上限_週'];
+        const month = formData['残業上限_月_時間'];
+        
+        let details = [];
+        if (day !== '0' && day !== '') details.push(`日:${day}H`);
+        if (week !== '0' && week !== '') details.push(`週:${week}H`);
+        if (month !== '0' && month !== '') details.push(`月:${month}H`);
+        
+        overtimeText += details.length > 0 ? ` (${details.join(', ')})` : '';
     }
     resultText += `時間外労働: ${overtimeText}\n`;
     
