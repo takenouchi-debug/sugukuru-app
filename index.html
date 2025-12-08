@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>スグクル商談シート V3.2 FINAL</title>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script> 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* /* CodePenの外部設定でTailwind CSSとFont Awesomeを読み込むため、
-   HTMLにあった<script>と<link>は不要です */
-
+/* CSSパネルの内容をすべて貼り付け */
 body { font-family: sans-serif; background: #f0f2f5; color: #333; margin: 0; padding: 0; overflow: hidden; }
 .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; opacity: 0; transform: translateY(50px); transition: all 0.4s ease-out; pointer-events: none; visibility: hidden; }
 .slide.active { opacity: 1; transform: translateY(0); pointer-events: all; visibility: visible; z-index: 10; }
@@ -22,20 +26,16 @@ input:focus, textarea:focus, select:focus { border-color: #2563eb; }
 .btn-nav.active { opacity: 1; pointer-events: all; transform: translateY(-2px); }
 .btn-nav:active { transform: translateY(0); }
 .result-box { background: #1f2937; color: #f3f4f6; padding: 20px; border-radius: 10px; font-family: monospace; white-space: pre-wrap; text-align: left; width: 100%; max-height: 300px; overflow-y: auto; margin: 20px 0; font-size: 0.95rem; border: 1px solid #374151; }
-        
-/* 読み込み中アニメーション */
 .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid #fff; width: 24px; height: 24px; animation: spin 1s linear infinite; display: none; margin-left: 10px; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-/* 時間外労働や苦情処理の入力欄を隠すためのスタイル */
 .extra-time-inputs { display: none; margin-top: 15px; padding: 15px; border: 1px dashed #ccc; border-radius: 10px; }
-
-/* CSSパネルのコードの末尾に追加 */
 body, html {
-    height: 100%; /* アプリがブラウザの高さに収まるように固定 */
-} */
+    height: 100%;
+} 
     </style>
 </head>
-<body><div class="slide active" id="slide-intro">
+<body>
+<div class="slide active" id="slide-intro">
     <div class="text-center p-6">
         <div class="mb-6 text-6xl text-blue-600"><i class="fas fa-rocket"></i></div>
         <h1 class="text-4xl font-extrabold text-gray-800 mb-4">スグクル営業App v3.2</h1>
@@ -219,13 +219,11 @@ body, html {
 <div class="nav-buttons"><button id="btn-next" class="btn-nav" onclick="nextSlide()">次へ <i class="fas fa-chevron-right"></i></button></div>
 
     <script>
-        /* JS（動き）を貼り付ける場所// ★★★★★ 重要：ここにコピーしたGASウェブアプリのURLを貼り付けてください ★★★★★
+        /* JSパネルの内容をすべて貼り付け */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkrHLrLPO1kQ5iQzCxvMwEp6fvjKPPvRXnNWYSEO6gFOm0_bRy5grtIghwR9xqoyxj/exec"; 
 // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
 let currentSlideIndex = 0;
-// CodePenではdocument.querySelectorAll('.slide')はinit()が動く前に実行されないため、
-// 実行時に取得するように修正します
 let slides; 
 const progressBar = document.getElementById('progressBar');
 const btnNext = document.getElementById('btn-next');
@@ -233,18 +231,14 @@ let formData = {};
 let totalSlides;
 
 function init() {
-    // スライドの要素を取得
     slides = document.querySelectorAll('.slide');
     if (slides.length < 2) {
-        // スライドが見つからない場合はエラーを出す（念のため）
         console.error("Error: Slides not found. HTML structure might be incomplete.");
         return;
     }
-    // イントロ(0)と結果画面(slides.length - 1)を除いた質問の総数
     totalSlides = slides.length - 2; 
 
     updateUI();
-    // キーボード操作のイベントリスナーは元のコードの機能を維持します
     document.addEventListener('keydown', function(e) {
         if(e.key === 'Enter' && !e.shiftKey && btnNext.classList.contains('active')) {
             if(document.activeElement.tagName !== 'TEXTAREA') nextSlide();
@@ -253,7 +247,6 @@ function init() {
 }
 
 function updateUI() {
-    // スライドの表示/非表示を切り替える処理は元のコードのスタイルを維持します
     slides.forEach((slide, index) => {
         slide.classList.remove('active', 'prev');
         if (index === currentSlideIndex) {
@@ -263,22 +256,19 @@ function updateUI() {
         }
     });
 
-    // プログレスバーの更新
     const questionIndex = currentSlideIndex - 1;
     const progress = questionIndex >= 0 && questionIndex <= totalSlides ? (questionIndex / totalSlides) * 100 : 0;
-    progressBar.style.width = `${progress}%`;
+    
+    // プログレスバーの要素が存在しないため、ここでは無視します（デザインが適用されれば解決）
 
-    // 「次へ」ボタンの活性化チェックは元のコードのスタイルを維持します
     if (currentSlideIndex > 0 && currentSlideIndex < slides.length - 1) {
         const currentInput = slides[currentSlideIndex].querySelector('input[type="text"], input[type="number"], input[type="date"], textarea, select, input[type="hidden"]');
         checkInput(currentInput);
         btnNext.style.display = 'flex';
     } else if (currentSlideIndex === slides.length - 1) {
-        // 結果画面ではボタンを非表示にし、結果を生成します
         btnNext.style.display = 'none';
         generateResult();
     } else {
-        // Intro画面
         btnNext.classList.add('active');
         btnNext.style.display = 'flex';
     }
@@ -286,7 +276,6 @@ function updateUI() {
 
 function nextSlide() {
     if (currentSlideIndex < slides.length - 1) {
-        // データ保存は元のコードの呼び出し方法を維持します
         saveCurrentFormData();
         currentSlideIndex++;
         updateUI();
@@ -294,7 +283,7 @@ function nextSlide() {
 }
 
 
-// --- フォームデータの保存 (データ構造のみ最新版に対応) ---
+// --- フォームデータの保存 ---
 function saveCurrentFormData() {
     // Q1. 契約の種別
     formData['契約の種別'] = document.getElementById('input-contract')?.value || '';
@@ -364,12 +353,11 @@ function saveCurrentFormData() {
 }
 
 
-// --- 入力チェック (元のコードの機能を維持) ---
+// --- 入力チェック ---
 function checkInput(element) {
     const currentSlide = slides[currentSlideIndex];
     let isComplete = true;
 
-    // (中略: 入力チェックロジックは元のコードの機能を維持)
     if (currentSlideIndex === 1) { 
         isComplete = document.getElementById('input-contract').value !== '';
     } else if (currentSlideIndex === 4) { 
@@ -410,7 +398,7 @@ function checkInput(element) {
     }
 }
 
-// --- 以下、元のアプリの選択・表示制御・コピー・シート送信機能 (機能を維持) ---
+// --- 以下、元のアプリの選択・表示制御・コピー・シート送信機能 ---
 
 function selectChoice(inputId, value) {
     const inputElement = document.getElementById(inputId);
@@ -464,12 +452,12 @@ function selectChoiceAndShowNote(inputId, value) {
 }
 
 
-// --- 結果生成 (元のアプリの出力を維持) ---
+// --- 結果生成 ---
 function generateResult() {
     saveCurrentFormData(); 
     const outputDiv = document.getElementById('result-output');
     
-    // Slackコピー用のテキストを生成（この出力形式も元のアプリの慣習を維持）
+    // Slackコピー用のテキストを生成
     let resultText = "【スグクル商談シート v3.2 登録情報】\n";
     resultText += "--------------------------------------\n";
 
@@ -515,7 +503,7 @@ function generateResult() {
     outputDiv.textContent = resultText;
 }
 
-// --- Slackコピー機能 (元のアプリの機能を維持) ---
+// --- Slackコピー機能 ---
 function copyText() {
     const textToCopy = document.getElementById('result-output').textContent;
     navigator.clipboard.writeText(textToCopy).then(() => {
@@ -526,7 +514,7 @@ function copyText() {
     });
 }
 
-// --- Google Sheet 送信機能 (元のアプリの機能を維持) ---
+// --- Google Sheet 送信機能 ---
 function sendToSheet() {
     if (SCRIPT_URL === "ここにウェブアプリのURLを貼り付けてください") {
         alert("エラー: SCRIPT_URLが設定されていません。HTMLの先頭にあるコメントを確認してください。");
@@ -570,7 +558,7 @@ function sendToSheet() {
 }
 
 // HTMLの読み込みが完了した後に実行されるようにする
-document.addEventListener('DOMContentLoaded', init); */
+document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
