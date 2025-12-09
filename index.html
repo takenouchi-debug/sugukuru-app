@@ -70,10 +70,64 @@ body, html {
     <input type="date" id="input-end-date" onchange="checkInput(this)" style="font-family: sans-serif; font-size: 1.2rem;">
 </div></div>
 
-<div class="slide"><div class="input-group"><div class="question-number">5/17 勤務時間</div><div class="question-text">就業時間、休憩時間、休日を入力してください</div>
-    <textarea id="input-time" rows="4" placeholder="例: 8:00〜17:00 (休憩60分 12:00〜13:00)&#10;休日: 土日祝休み" oninput="checkInput(this)"></textarea>
-</div></div>
+<div class="slide"><div class="input-group">
+    <div class="question-number">5/17 勤務時間と休日</div>
+    <div class="question-text">勤務時間、休日、および休憩を入力してください</div>
+    
+    <label class="block text-gray-500 font-medium mb-1 mt-3 text-base">勤務時間帯</label>
+    <div class="flex items-center justify-between gap-3 mb-4">
+        <select id="input-start-time" class="w-1/2 text-base" onchange="checkInput(this)">
+            <option value="">開始時刻</option>
+            <option value="07:00">07:00</option><option value="07:30">07:30</option>
+            <option value="08:00">08:00</option><option value="08:30">08:30</option>
+            <option value="09:00">09:00</option><option value="09:30">09:30</option>
+            <option value="10:00">10:00</option><option value="10:30">10:30</option>
+            <option value="11:00">11:00</option><option value="11:30">11:30</option>
+            <option value="12:00">12:00</option><option value="12:30">12:30</option>
+            <option value="13:00">13:00</option><option value="13:30">13:30</option>
+            <option value="14:00">14:00</option><option value="14:30">14:30</option>
+            <option value="15:00">15:00</option><option value="15:30">15:30</option>
+            <option value="16:00">16:00</option><option value="16:30">16:30</option>
+            <option value="17:00">17:00</option><option value="17:30">17:30</option>
+            <option value="18:00">18:00</option><option value="18:30">18:30</option>
+            <option value="19:00">19:00</option><option value="19:30">19:30</option>
+            <option value="20:00">20:00</option><option value="20:30">20:30</option>
+            <option value="21:00">21:00</option><option value="21:30">21:30</option>
+            <option value="22:00">22:00</option>
+        </select>
+        <span class="text-xl font-bold text-gray-600">〜</span>
+        <select id="input-end-time" class="w-1/2 text-base" onchange="checkInput(this)">
+            <option value="">終了時刻</option>
+            <option value="16:00">16:00</option><option value="16:30">16:30</option>
+            <option value="17:00">17:00</option><option value="17:30">17:30</option>
+            <option value="18:00">18:00</option><option value="18:30">18:30</option>
+            <option value="19:00">19:00</option><option value="19:30">19:30</option>
+            <option value="20:00">20:00</option><option value="20:30">20:30</option>
+            <option value="21:00">21:00</option><option value="21:30">21:30</option>
+            <option value="22:00">22:00</option><option value="22:30">22:30</option>
+            <option value="23:00">23:00</option><option value="23:30">23:30</option>
+            <option value="24:00">24:00</option><option value="24:30">24:30</option>
+            <option value="25:00">25:00 (翌1:00)</option>
+        </select>
+    </div>
 
+    <div class="grid grid-cols-1 gap-4">
+        <div class="flex items-center gap-2">
+            <label class="block text-gray-500 font-medium text-base w-1/3">休日</label>
+            <input type="number" id="input-holiday-days" placeholder="例: 2" oninput="checkInput(this)" class="w-1/4 text-center">
+            <span class="text-xl font-bold text-gray-500">日/週</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <label class="block text-gray-500 font-medium text-base w-1/3">休憩時間</label>
+            <input type="number" id="input-break-minutes" placeholder="例: 60" oninput="checkInput(this)" class="w-1/4 text-center">
+            <span class="text-xl font-bold text-gray-500">分</span>
+        </div>
+    </div>
+    
+    <label class="block text-gray-500 font-medium mb-1 mt-4 text-base">その他（休憩の取り方、変形労働など）</label>
+    <textarea id="input-time-notes" rows="2" placeholder="例: 12:00〜13:00に取得。変形労働制。" oninput="checkInput(this)"></textarea>
+
+</div></div>
 <div class="slide"><div class="input-group"><div class="question-number">6/17 時間外労働</div><div class="question-text">時間外労働の有無を選択し、上限を入力してください</div>
     <button class="btn-choice" id="choice-overtime-yes" onclick="toggleExtraTimeInputs('input-overtime', '有', true)">A. 有</button>
     <button class="btn-choice" id="choice-overtime-no" onclick="toggleExtraTimeInputs('input-overtime', '無', false)">B. 無</button>
@@ -95,6 +149,7 @@ body, html {
         </div>
     </div>
 </div></div>
+
 <div class="slide"><div class="input-group"><div class="question-number">7/17 募集枠</div><div class="question-text">必要人数を入力してください</div>
     <div class="flex items-center gap-4">
         <input type="number" id="input-headcount" placeholder="3" oninput="checkInput(this)" class="text-center">
@@ -298,8 +353,16 @@ function saveCurrentFormData() {
     // Q4. 期間
     formData['開始日'] = document.getElementById('input-start-date')?.value || '';
     formData['終了予定日'] = document.getElementById('input-end-date')?.value || '';
-    // Q5. 勤務時間と休日
-    formData['勤務時間・休日'] = document.getElementById('input-time')?.value || '';
+    
+    // Q5. 勤務時間と休日 (最終修正版)
+    const startTime = document.getElementById('input-start-time')?.value || '';
+    const endTime = document.getElementById('input-end-time')?.value || '';
+    const breakTime = document.getElementById('input-break-minutes')?.value || '';
+    const holidayDays = document.getElementById('input-holiday-days')?.value || '';
+    const timeNotes = document.getElementById('input-time-notes')?.value || '';
+
+    formData['勤務時間・休日'] = `${startTime}〜${endTime} (休憩${breakTime}分). 休日: 週${holidayDays}日. 備考: ${timeNotes}`;
+    
     // Q6. 時間外労働 
     formData['時間外労働の有無'] = document.getElementById('input-overtime')?.value || '無';
     if (formData['時間外労働の有無'] === '有') {
@@ -364,8 +427,14 @@ function checkInput(element) {
         isComplete = document.getElementById('input-contract').value !== '';
     } else if (currentSlideIndex === 4) { 
         isComplete = document.getElementById('input-start-date').value !== '' && document.getElementById('input-end-date').value !== '';
+    } else if (currentSlideIndex === 5) { 
+        // Q5. 勤務時間と休日のチェック (最終修正版: 4つの入力が必須)
+        isComplete = document.getElementById('input-start-time').value !== '' && 
+                     document.getElementById('input-end-time').value !== '' &&
+                     document.getElementById('input-holiday-days').value !== '' &&
+                     document.getElementById('input-break-minutes').value !== '';
     } else if (currentSlideIndex === 6) { 
-        // Q6. 時間外労働のチェック (修正後: 有の場合、月の時間をチェック)
+        // Q6. 時間外労働のチェック 
         const overtime = document.getElementById('input-overtime').value;
         isComplete = overtime !== '';
         if (overtime === '有') {
@@ -378,7 +447,7 @@ function checkInput(element) {
     } else if (currentSlideIndex === 8) { 
         isComplete = document.getElementById('input-price-nomental').value !== '';
     } else if (currentSlideIndex === 10) { 
-        // Q10. 苦情処理のチェック (修正後: その他を選択した場合、氏名と連絡先をチェック)
+        // Q10. 苦情処理のチェック 
         const complaintRole = document.getElementById('input-complaint-role').value;
         isComplete = complaintRole !== '';
         if (complaintRole === 'その他') {
@@ -482,7 +551,9 @@ function generateResult() {
     resultText += `業務内容: ${formData['業務内容'].replace(/\n/g, ' ')}\n`;
     resultText += `就業場所: ${formData['就業場所'].replace(/\n/g, ' ')}\n`;
     resultText += `期間: ${formData['開始日']} 〜 ${formData['終了予定日']}\n`;
-    resultText += `勤務時間・休日: ${formData['勤務時間・休日'].replace(/\n/g, ' ')}\n`;
+    
+    // 勤務時間・休日 (最終修正版の表示)
+    resultText += `勤務時間・休日: ${formData['勤務時間・休日']}\n`;
     
     // 時間外労働の表示
     let overtimeText = formData['時間外労働の有無'];
