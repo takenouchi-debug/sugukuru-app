@@ -33,6 +33,9 @@ input:focus, textarea:focus, select:focus { border-color: #2563eb; }
 body, html {
     height: 100%;
 } 
+/* 便宜の供与用スタイル */
+.supply-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb; }
+.supply-item { font-weight: 500; }
     </style>
 </head>
 <body>
@@ -228,10 +231,46 @@ body, html {
     </div>
 </div></div>
 
-<div class="slide"><div class="input-group"><div class="question-number">14/17 便宜供与</div><div class="question-text">便宜の供与（道具、車両等）を入力してください</div>
-    <textarea id="input-convenience" rows="3" placeholder="例: 作業着は支給、自転車の貸し出しあり" oninput="checkInput(this)"></textarea>
-</div></div>
+<div class="slide"><div class="input-group">
+    <div class="question-number">14/17 便宜供与</div>
+    <div class="question-text">以下の項目について、供与元を選択してください</div>
 
+    <div class="space-y-3">
+        <div class="supply-row">
+            <span class="supply-item">Wi-Fi/ネット環境</span>
+            <div class="flex gap-4">
+                <button class="btn-choice w-auto px-4 py-2" onclick="selectChoice('input-supply-wifi', '貴社で提供')">貴社</button>
+                <button class="btn-choice w-auto px-4 py-2" onclick="selectChoice('input-supply-wifi', 'スグクルで提供')">スグクル</button>
+                <button class="btn-choice w-auto px-4 py-2" onclick="selectChoice('input-supply-wifi', '不要')">不要</button>
+            </div>
+            <input type="hidden" id="input-supply-wifi" onchange="checkInput(this)">
+        </div>
+        
+        <div class="supply-row">
+            <span class="supply-item">移動用自転車/車両</span>
+            <div class="flex gap-4">
+                <button class="btn-choice w-auto px-4 py-2" onclick="selectChoice('input-supply-bike', '貴社で提供')">貴社</button>
+                <button class="btn-choice w-auto px-4 py-2" onclick="selectChoice('input-supply-bike', 'スグクルで提供')">スグクル</button>
+                <button class="btn-choice w-auto px-4 py-2" onclick="selectChoice('input-supply-bike', '不要')">不要</button>
+            </div>
+            <input type="hidden" id="input-supply-bike" onchange="checkInput(this)">
+        </div>
+        
+        <div class="supply-row">
+            <span class="supply-item">作業着・道具</span>
+            <div class="flex gap-4">
+                <button class="btn-choice w-auto px-4 py-2" onclick="selectChoice('input-supply-tools', '貴社で提供')">貴社</button>
+                <button class="btn-choice w-auto px-4 py-2" onclick="selectChoice('input-supply-tools', 'スグクルで提供')">スグクル</button>
+                <button class="btn-choice w-auto px-4 py-2" onclick="selectChoice('input-supply-tools', '不要')">不要</button>
+            </div>
+            <input type="hidden" id="input-supply-tools" onchange="checkInput(this)">
+        </div>
+    </div>
+    
+    <label class="block text-gray-500 font-medium mb-1 mt-4 text-base">その他、供与されるもの</label>
+    <textarea id="input-supply-notes" rows="2" placeholder="例: ヘルメット、安全靴、水筒など" oninput="checkInput(this)"></textarea>
+
+</div></div>
 <div class="slide"><div class="input-group"><div class="question-number">15/17 福利厚生</div><div class="question-text">福利厚生施設の利用等について記述してください</div>
     <textarea id="input-welfare" rows="3" placeholder="例: 食堂利用可（有料）、更衣室利用可" oninput="checkInput(this)"></textarea>
 </div></div>
@@ -354,7 +393,7 @@ function saveCurrentFormData() {
     formData['開始日'] = document.getElementById('input-start-date')?.value || '';
     formData['終了予定日'] = document.getElementById('input-end-date')?.value || '';
     
-    // Q5. 勤務時間と休日 (最終修正版)
+    // Q5. 勤務時間と休日
     const startTime = document.getElementById('input-start-time')?.value || '';
     const endTime = document.getElementById('input-end-time')?.value || '';
     const breakTime = document.getElementById('input-break-minutes')?.value || '';
@@ -403,8 +442,13 @@ function saveCurrentFormData() {
         formData['自力通勤_手段'] = '該当なし';
         formData['自力通勤_備考'] = '該当なし';
     }
-    // Q14. 便宜の供与
-    formData['便宜の供与'] = document.getElementById('input-convenience')?.value || '';
+    
+    // Q14. 便宜の供与 (最終修正版)
+    formData['供与_Wi-Fi'] = document.getElementById('input-supply-wifi')?.value || '未選択';
+    formData['供与_自転車'] = document.getElementById('input-supply-bike')?.value || '未選択';
+    formData['供与_道具'] = document.getElementById('input-supply-tools')?.value || '未選択';
+    formData['供与_その他'] = document.getElementById('input-supply-notes')?.value || '特になし';
+
     // Q15. 福利厚生
     formData['福利厚生施設の利用等'] = document.getElementById('input-welfare')?.value || '';
     // Q16. 営業担当者
@@ -428,7 +472,7 @@ function checkInput(element) {
     } else if (currentSlideIndex === 4) { 
         isComplete = document.getElementById('input-start-date').value !== '' && document.getElementById('input-end-date').value !== '';
     } else if (currentSlideIndex === 5) { 
-        // Q5. 勤務時間と休日のチェック (最終修正版: 4つの入力が必須)
+        // Q5. 勤務時間と休日のチェック
         isComplete = document.getElementById('input-start-time').value !== '' && 
                      document.getElementById('input-end-time').value !== '' &&
                      document.getElementById('input-holiday-days').value !== '' &&
@@ -441,7 +485,6 @@ function checkInput(element) {
             const dayInput = document.getElementById('input-overtime-day').value.trim();
             const weekInput = document.getElementById('input-overtime-week').value.trim();
             const monthInput = document.getElementById('input-overtime-month-hours').value.trim();
-            // 3つのうちどれか一つでも入力されていればOK
             isComplete = (dayInput !== '' || weekInput !== '' || monthInput !== ''); 
         }
     } else if (currentSlideIndex === 8) { 
@@ -453,7 +496,6 @@ function checkInput(element) {
         if (complaintRole === 'その他') {
             const nameInput = document.getElementById('input-complaint-name').value.trim();
             const contactInput = document.getElementById('input-complaint-contact').value.trim();
-            // 名前か連絡先が入力されていればOK
             isComplete = (nameInput !== '' || contactInput !== '');
         }
     } else if (currentSlideIndex === 13) { 
@@ -462,6 +504,14 @@ function checkInput(element) {
         if (transport === '自力通勤') {
             isComplete = document.getElementById('input-transport-means').value !== '';
         }
+    } else if (currentSlideIndex === 14) { 
+        // Q14. 便宜の供与のチェック (3つの必須選択肢が選ばれているか)
+        isComplete = document.getElementById('input-supply-wifi').value !== '未選択' && 
+                     document.getElementById('input-supply-bike').value !== '未選択' &&
+                     document.getElementById('input-supply-tools').value !== '未選択';
+    } else if (currentSlideIndex === 17) { 
+        // Q17. 備考のチェック (空欄でOK)
+        isComplete = true; // 常に完了と見なす
     } else if (currentSlideIndex > 0 && currentSlideIndex < slides.length - 1) {
         const inputElement = currentSlide.querySelector('input[type="text"], input[type="number"], input[type="date"], textarea, select');
         if (inputElement) {
@@ -482,8 +532,11 @@ function checkInput(element) {
 
 function selectChoice(inputId, value) {
     const inputElement = document.getElementById(inputId);
-    inputElement.value = value;
+    if(inputElement.type === 'hidden') {
+        inputElement.value = value;
+    }
     
+    // 関連するボタンのスタイルを更新
     const buttons = inputElement.parentElement.querySelectorAll('.btn-choice');
     buttons.forEach(btn => btn.classList.remove('selected'));
     if (event && event.currentTarget) {
@@ -505,7 +558,6 @@ function toggleExtraTimeInputs(inputId, value, show) {
         document.getElementById('input-overtime-week').value = '';
         document.getElementById('input-overtime-month-hours').value = '';
     }
-    // ここでチェックロジックを強制的に実行する
     checkInput(document.getElementById(inputId));
 }
 
@@ -519,7 +571,6 @@ function toggleComplaintInputs(inputId, value, show) {
         document.getElementById('input-complaint-name').value = '';
         document.getElementById('input-complaint-contact').value = '';
     }
-    // ここでチェックロジックを強制的に実行する
     checkInput(document.getElementById(inputId));
 }
 
@@ -533,7 +584,6 @@ function selectChoiceAndShowNote(inputId, value) {
         document.getElementById('input-transport-means').value = '';
         document.getElementById('input-transport-note').value = '';
     }
-    // ここでチェックロジックを強制的に実行する
     checkInput(document.getElementById(inputId));
 }
 
@@ -552,7 +602,7 @@ function generateResult() {
     resultText += `就業場所: ${formData['就業場所'].replace(/\n/g, ' ')}\n`;
     resultText += `期間: ${formData['開始日']} 〜 ${formData['終了予定日']}\n`;
     
-    // 勤務時間・休日 (最終修正版の表示)
+    // 勤務時間・休日
     resultText += `勤務時間・休日: ${formData['勤務時間・休日']}\n`;
     
     // 時間外労働の表示
@@ -592,7 +642,12 @@ function generateResult() {
     }
     resultText += `送迎・通勤: ${transportDisplay}\n`;
 
-    resultText += `便宜の供与: ${formData['便宜の供与']}\n`;
+    // 便宜の供与 (最終修正版の表示)
+    resultText += `便宜供与(Wi-Fi): ${formData['供与_Wi-Fi']}\n`;
+    resultText += `便宜供与(自転車): ${formData['供与_自転車']}\n`;
+    resultText += `便宜供与(道具): ${formData['供与_道具']}\n`;
+    resultText += `便宜供与(その他): ${formData['供与_その他']}\n`;
+
     resultText += `福利厚生: ${formData['福利厚生施設の利用等']}\n`;
     resultText += `営業担当者: ${formData['営業担当者']}\n`;
     resultText += "--------------------------------------\n";
